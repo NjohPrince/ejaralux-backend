@@ -21,7 +21,8 @@
     "pg": "^8.14.1",
     "redis": "^4.7.1",
     "reflect-metadata": "^0.2.2",
-    "typeorm": "0.3.25"
+    "typeorm": "0.3.25",
+    "zod": "^4.0.5"
   },
   "scripts": {
     "start": "ts-node-dev --respawn --transpile-only --exit-child src/app.ts",
