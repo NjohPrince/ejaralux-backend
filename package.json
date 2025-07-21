@@ -9,8 +9,11 @@
     "@types/bcryptjs": "^3.0.0",
     "@types/config": "^3.3.5",
     "@types/cookie-parser": "^1.4.9",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/morgan": "^1.9.10",
     "@types/node": "^24.0.15",
+    "morgan": "^1.10.1",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.3"
@@ -20,6 +23,7 @@
     "bcryptjs": "^3.0.2",
     "config": "^4.0.1",
     "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.0",
     "envalid": "^8.1.0",
     "express": "^4.21.2",
@@ -32,6 +36,9 @@
   },
   "scripts": {
     "start": "ts-node-dev --respawn --transpile-only --exit-child src/app.ts",
-    "typeorm": "typeorm-ts-node-commonjs"
+    "build": "tsc -p .",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migrate": "rm -rf build && yarn build && yarn typeorm migration:generate ./src/migrations/added-entity -d ./src/utils/data-source.util.ts",
+    "db:push": "rm -rf build && yarn build && yarn typeorm migration:run -d src/utils/data-source.util.ts"
   }
 }
