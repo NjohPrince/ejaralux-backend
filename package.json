@@ -1,0 +1,30 @@
+{
+  "name": "ejaralux-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/NjohPrince/ejaralux-backend.git",
+  "author": "NjohPrince <jufredprince@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/config": "^3.3.5",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.15",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "config": "^4.0.1",
+    "dotenv": "^17.2.0",
+    "envalid": "^8.1.0",
+    "express": "^4.21.2",
+    "pg": "^8.14.1",
+    "redis": "^4.7.1",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "0.3.25"
+  },
+  "scripts": {
+    "start": "ts-node-dev --respawn --transpile-only --exit-child src/app.ts",
+    "typeorm": "typeorm-ts-node-commonjs"
+  }
+}
