@@ -1,6 +1,10 @@
+import config from "config";
+
 import { User } from "../entities/user.entity";
 import { CreateUserInput } from "../schemas/auth.schema";
+import redisClient from "../utils/connect-redis.util";
 import { AppDataSource } from "../utils/data-source.util";
+import { signJwt } from "../utils/jwt.util";
 
 const userRepository = AppDataSource.getRepository(User);
 
@@ -20,4 +24,20 @@ export const findUserById = async (userId: string) => {
 
 export const findUser = async (query: Object) => {
   return await userRepository.findOneBy(query);
+};
+
+export const signTokens = async (user: User) => {
+  redisClient.set(user.id, JSON.stringify(user), {
+    EX: config.get<number>("redisCacheExpiresIn") * 60,
+  });
+
+  const access_token = signJwt({ sub: user.id }, "accessTokenPrivateKey", {
+    expiresIn: `${config.get<number>("accessTokenExpiresIn")}m`,
+  });
+
+  const refresh_token = signJwt({ sub: user.id }, "refreshTokenPrivateKey", {
+    expiresIn: `${config.get<number>("refreshTokenExpiresIn")}m`,
+  });
+
+  return { access_token, refresh_token };
 };
