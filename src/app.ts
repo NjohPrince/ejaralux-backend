@@ -15,15 +15,31 @@ import redisClient from "./utils/connect-redis.util";
 import AppError from "./utils/app-error.util";
 import { setupSwaggerDocs } from "./utils/swagger.util";
 
+// import nodemailer from "nodemailer";
+
+// (async function () {
+//   const credentials = await nodemailer.createTestAccount();
+//   console.log(credentials);
+// })();
+
+// {
+//   user: 'xzqe34jonsngebir@ethereal.email',
+//   pass: 'JQ2JdGqc6etWQ1QvzB',
+//   smtp: { host: 'smtp.ethereal.email', port: 587, secure: false },
+//   imap: { host: 'imap.ethereal.email', port: 993, secure: true },
+//   pop3: { host: 'pop3.ethereal.email', port: 995, secure: true },
+//   web: 'https://ethereal.email',
+//   mxEnabled: false
+// }
+
 AppDataSource.initialize()
   .then(async () => {
     validateEnv();
 
     const app = express();
 
-    // TEMPLATE ENGINE
-
-    // MIDDLEWARE
+    app.set("view engine", "pug");
+    app.set("views", `${__dirname}/views`);
 
     app.use(express.json({ limit: "10kb" }));
 
@@ -116,8 +132,6 @@ AppDataSource.initialize()
 //       validateEnv();
 
 //       const app = express();
-
-//       // TEMPLATE ENGINE (preserved for future)
 
 //       // middleware
 //       app.use(express.json({ limit: "10kb" }));
