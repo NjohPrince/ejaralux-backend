@@ -35,3 +35,8 @@ yarn install
 ```bash
 yarn start
 ```
+## System Architecture
+
+### Schema (Updated with time)
+
+<img width="1279" height="954" alt="Screenshot 2025-07-22 at 19 12 35" src="https://github.com/user-attachments/assets/45442b16-2bdf-407d-9deb-90a4e162acd9" />
