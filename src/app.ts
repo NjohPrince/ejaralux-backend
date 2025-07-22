@@ -12,6 +12,7 @@ import { AppDataSource } from "./utils/data-source.util";
 import validateEnv from "./utils/validate-env.util";
 import redisClient from "./utils/connect-redis.util";
 import AppError from "./utils/app-error.util";
+import { setupSwaggerDocs } from "./utils/swagger.util";
 
 AppDataSource.initialize()
   .then(async () => {
@@ -48,6 +49,10 @@ AppDataSource.initialize()
       });
     });
 
+    const port = config.get<number>("port");
+
+    setupSwaggerDocs(app, port);
+
     app.all("*", (req: Request, res: Response, next: NextFunction) => {
       next(new AppError(404, `Route ${req.originalUrl} not found`));
     });
@@ -64,9 +69,8 @@ AppDataSource.initialize()
       }
     );
 
-    const port = config.get<number>("port");
-    app.listen(port);
-
-    console.log(`Server started on port: ${port}`);
+    app.listen(port, () => {
+      console.log(`🚀 Server started on port: ${port}`);
+    });
   })
   .catch((error) => console.log(error));
