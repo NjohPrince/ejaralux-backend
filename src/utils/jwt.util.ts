@@ -4,14 +4,15 @@ import config from "config";
 export const signJwt = (
   payload: Object,
   keyName: "accessTokenPrivateKey" | "refreshTokenPrivateKey",
-  options: SignOptions
+  options?: SignOptions
 ) => {
   const privateKey = Buffer.from(
     config.get<string>(keyName),
     "base64"
   ).toString("ascii");
+
   return jwt.sign(payload, privateKey, {
-    ...(options && options),
+    ...options,
     algorithm: "RS256",
   });
 };
@@ -25,9 +26,10 @@ export const verifyJwt = <T>(
       config.get<string>(keyName),
       "base64"
     ).toString("ascii");
-    const decoded = jwt.verify(token, publicKey) as T;
 
-    return decoded;
+    return jwt.verify(token, publicKey, {
+      algorithms: ["RS256"],
+    }) as T;
   } catch (error) {
     return null;
   }

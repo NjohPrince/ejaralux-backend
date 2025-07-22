@@ -1,3 +1,5 @@
+import AppError from "../utils/app-error.util";
+
 import { Request, Response, NextFunction } from "express";
 import { ZodError, ZodObject, ZodRawShape } from "zod";
 
@@ -13,11 +15,13 @@ export const validate =
       return next();
     } catch (error) {
       if (error instanceof ZodError) {
-        return res.status(400).json({
-          status: "fail",
-          errors: error.issues,
-        });
+        const message = error.issues
+          .map((err) => `${err.path.join(".")}: ${err.message}`)
+          .join("; ");
+
+        return next(new AppError(400, message));
       }
+
       return next(error);
     }
   };
