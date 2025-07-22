@@ -8,10 +8,11 @@ import {
   findUserById,
   signTokens,
 } from "../services/user.service";
-import { User } from "../entities/user.entity";
+import { RoleEnumType, User } from "../entities/user.entity";
 import AppError from "../utils/app-error.util";
 import { signJwt, verifyJwt } from "../utils/jwt.util";
 import redisClient from "../utils/connect-redis.util";
+import Email from "../utils/email.util";
 
 const cookiesOptions: CookieOptions = {
   httpOnly: true,
@@ -44,20 +45,41 @@ export const registerUserHandler = async (
   try {
     const { firstName, lastName, password, email } = req.body;
 
-    const user = await createUser({
+    const newUser = await createUser({
       firstName,
       lastName,
       email: email.toLowerCase(),
       password,
-      role: req.body.role || "user",
+      role: req.body.role || RoleEnumType.USER,
     });
 
-    return res.status(201).json({
-      status: "success",
-      data: {
-        user,
-      },
-    });
+    const { hashedVerificationCode, verificationCode } =
+      User.createVerificationCode();
+    newUser.verificationCode = hashedVerificationCode;
+    await newUser.save();
+
+    // send verification email
+    const redirectUrl = `${config.get<string>(
+      "origin"
+    )}/verifyemail/${verificationCode}`;
+
+    try {
+      await new Email(newUser, redirectUrl).sendVerificationCode();
+
+      res.status(201).json({
+        status: "success",
+        message:
+          "An email with a verification link has been sent to your email",
+      });
+    } catch (error) {
+      newUser.verificationCode = null;
+      await newUser.save();
+
+      return res.status(500).json({
+        status: "error",
+        message: "There was an error sending email, please try again",
+      });
+    }
   } catch (err: any) {
     if (err.code === "23505") {
       return res.status(409).json({
