@@ -18,7 +18,7 @@ export const createCategoryHandler = async (
 
 export const getAllCategoriesHandler = async (_req: Request, res: Response) => {
   const categories = await categoryService.findAllCategories();
-  res.json({ status: "success", data: categories });
+  return res.json({ status: "success", data: categories });
 };
 
 export const getCategoryHandler = async (
@@ -28,7 +28,7 @@ export const getCategoryHandler = async (
 ) => {
   const category = await categoryService.findCategoryById(req.params.id);
   if (!category) return next(new AppError(404, "Category not found"));
-  res.json({ status: "success", data: category });
+  return res.json({ status: "success", data: category });
 };
 
 export const updateCategoryHandler = async (
@@ -41,7 +41,7 @@ export const updateCategoryHandler = async (
     req.body.name
   );
   if (!updated) return next(new AppError(404, "Category not found"));
-  res.json({ status: "success", data: updated });
+  return res.json({ status: "success", data: updated });
 };
 
 export const deleteCategoryHandler = async (
@@ -51,5 +51,5 @@ export const deleteCategoryHandler = async (
 ) => {
   const result = await categoryService.deleteCategory(req.params.id);
   if (!result.affected) return next(new AppError(404, "Category not found"));
-  res.status(204).send();
+  return res.status(204).send();
 };

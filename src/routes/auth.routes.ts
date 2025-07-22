@@ -1,14 +1,16 @@
 import express from "express";
 
 import {
+  forgotPasswordHandler,
   loginUserHandler,
   logoutHandler,
   refreshAccessTokenHandler,
   registerUserHandler,
+  resetPasswordHandler,
   verifyEmailHandler,
 } from "../controllers/auth.controller";
 import { validate } from "../middleware/validate";
-import { createUserSchema, loginUserSchema } from "../schemas/auth.schema";
+import { createUserSchema, forgotPasswordSchema, loginUserSchema, resetPasswordSchema } from "../schemas/auth.schema";
 import { requireUser } from "../middleware/require-user";
 import { deserializeUser } from "../middleware/deserialize-user";
 import { loginLimiter, signupLimiter } from "../middleware/rate-limiters";
@@ -204,5 +206,63 @@ router.get(
   validate(verifyEmailSchema),
   verifyEmailHandler
 );
+
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Request a password reset email
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *     responses:
+ *       200:
+ *         description: Reset email sent
+ *       404:
+ *         description: No user found
+ *       500:
+ *         $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post("/forgot-password", validate(forgotPasswordSchema), forgotPasswordHandler);
+
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Reset user password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 example: abc123token
+ *               password:
+ *                 type: string
+ *                 example: newpassword123
+ *               passwordConfirm:
+ *                 type: string
+ *                 example: newpassword123
+ *     responses:
+ *       200:
+ *         description: Password reset successful
+ *       400:
+ *         description: Invalid token or expired
+ *       500:
+ *         $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post("/reset-password", validate(resetPasswordSchema), resetPasswordHandler);
 
 export default router;

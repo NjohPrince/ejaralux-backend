@@ -2,7 +2,12 @@ import config from "config";
 import { CookieOptions, NextFunction, Request, Response } from "express";
 import crypto from "crypto";
 
-import { CreateUserInput, LoginUserInput } from "../schemas/auth.schema";
+import {
+  CreateUserInput,
+  ForgotPasswordInput,
+  LoginUserInput,
+  ResetPasswordInput,
+} from "../schemas/auth.schema";
 import {
   createUser,
   findUser,
@@ -17,6 +22,10 @@ import redisClient from "../utils/connect-redis.util";
 import Email from "../utils/email.util";
 import { VerifyEmailInput } from "../schemas/v-email.schema";
 import { AppDataSource } from "../utils/data-source.util";
+import { catchAsync } from "../utils/catch-async.util";
+import { MoreThan } from "typeorm";
+
+const userRepo = AppDataSource.getRepository(User);
 
 const cookiesOptions: CookieOptions = {
   httpOnly: true,
@@ -262,3 +271,75 @@ export const verifyEmailHandler = async (
     next(err);
   }
 };
+
+export const forgotPasswordHandler = catchAsync(
+  async (
+    req: Request<{}, {}, ForgotPasswordInput>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const { email } = req.body;
+
+    const user = await userRepo.findOneBy({ email });
+    if (!user) return next(new AppError(404, "No user found with that email"));
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+
+    user.passwordResetToken = hashedToken;
+    user.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+
+    await userRepo.save(user);
+
+    const resetURL = `${req.protocol}://${req.get(
+      "host"
+    )}/auth/reset-password/${resetToken}`;
+
+    try {
+      await new Email(user, resetURL).sendPasswordResetToken();
+      res
+        .status(200)
+        .json({ status: "success", message: "Reset link sent to email" });
+    } catch (err) {
+      user.passwordResetToken = null;
+      user.passwordResetExpires = null;
+      await userRepo.save(user);
+      return next(new AppError(500, "Failed to send email"));
+    }
+  }
+);
+
+export const resetPasswordHandler = catchAsync(
+  async (
+    req: Request<{}, {}, ResetPasswordInput>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const { token, password } = req.body;
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = await userRepo.findOne({
+      where: {
+        passwordResetToken: hashedToken,
+        passwordResetExpires: MoreThan(new Date()),
+      },
+    });
+
+    if (!user)
+      return next(new AppError(400, "Token is invalid or has expired"));
+
+    user.password = password;
+    user.passwordResetToken = null;
+    user.passwordResetExpires = null;
+
+    await userRepo.save(user);
+
+    res
+      .status(200)
+      .json({ status: "success", message: "Password reset successfully" });
+  }
+);

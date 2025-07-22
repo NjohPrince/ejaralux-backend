@@ -50,6 +50,12 @@ export class User extends Model {
   })
   verificationCode!: string | null;
 
+  @Column({ type: "text", nullable: true })
+  passwordResetToken: string | null;
+
+  @Column({ type: "timestamp", nullable: true })
+  passwordResetExpires: Date | null;
+
   toJSON() {
     return { ...this, password: undefined, verified: undefined };
   }
