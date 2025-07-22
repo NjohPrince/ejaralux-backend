@@ -29,6 +29,8 @@
     "dotenv": "^17.2.0",
     "envalid": "^8.1.0",
     "express": "^4.21.2",
+    "express-rate-limit": "^8.0.1",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.14.1",
     "redis": "^4.7.1",

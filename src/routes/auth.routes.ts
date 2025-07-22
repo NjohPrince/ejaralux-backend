@@ -10,6 +10,7 @@ import { validate } from "../middleware/validate";
 import { createUserSchema, loginUserSchema } from "../schemas/auth.schema";
 import { requireUser } from "../middleware/require-user";
 import { deserializeUser } from "../middleware/deserialize-user";
+import { loginLimiter, signupLimiter } from "../middleware/rate-limiters";
 
 const router = express.Router();
 
@@ -52,7 +53,12 @@ const router = express.Router();
  *       400:
  *         description: Validation error
  */
-router.post("/register", validate(createUserSchema), registerUserHandler);
+router.post(
+  "/register",
+  signupLimiter,
+  validate(createUserSchema),
+  registerUserHandler
+);
 
 /**
  * @swagger
@@ -80,7 +86,12 @@ router.post("/register", validate(createUserSchema), registerUserHandler);
  *       401:
  *         description: Invalid credentials
  */
-router.post("/login", validate(loginUserSchema), loginUserHandler);
+router.post(
+  "/login",
+  loginLimiter,
+  validate(loginUserSchema),
+  loginUserHandler
+);
 
 /**
  * @swagger
