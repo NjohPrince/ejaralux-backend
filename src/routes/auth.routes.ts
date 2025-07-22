@@ -82,8 +82,51 @@ router.post("/register", validate(createUserSchema), registerUserHandler);
  */
 router.post("/login", validate(loginUserSchema), loginUserHandler);
 
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   get:
+ *     summary: Logout user by clearing tokens and session
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully logged out
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ */
 router.get("/logout", deserializeUser, requireUser, logoutHandler);
 
+/**
+ * @swagger
+ * /api/auth/refresh:
+ *   get:
+ *     summary: Refresh access token using refresh token cookie
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: New access token issued
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 access_token:
+ *                   type: string
+ *                   description: New JWT access token
+ *       403:
+ *         description: Forbidden - invalid or missing refresh token
+ */
 router.get("/refresh", refreshAccessTokenHandler);
 
 export default router;
