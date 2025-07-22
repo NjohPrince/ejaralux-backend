@@ -28,7 +28,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/categories:
+ * /categories:
  *   get:
  *     summary: Get all categories
  *     tags: [Categories]
@@ -40,7 +40,7 @@ router.get("/", getAllCategoriesHandler);
 
 /**
  * @swagger
- * /api/categories/{id}:
+ * /categories/{id}:
  *   get:
  *     summary: Get category by ID
  *     tags: [Categories]
@@ -58,7 +58,7 @@ router.get("/:id", getCategoryHandler);
 
 /**
  * @swagger
- * /api/categories:
+ * /categories:
  *   post:
  *     summary: Create a new category
  *     tags: [Categories]
@@ -90,7 +90,7 @@ router.post(
 
 /**
  * @swagger
- * /api/categories/{id}:
+ * /categories/{id}:
  *   patch:
  *     summary: Update a category
  *     tags: [Categories]
@@ -125,7 +125,7 @@ router.patch(
 
 /**
  * @swagger
- * /api/categories/{id}:
+ * /categories/{id}:
  *   delete:
  *     summary: Delete a category
  *     tags: [Categories]

@@ -18,4 +18,6 @@ export default {
     port: "EMAIL_PORT",
     user: "EMAIL_USER",
   },
+
+  emailFrom: "EMAIL_FROM",
 };

@@ -17,7 +17,7 @@ router.use(deserializeUser, requireUser);
 
 /**
  * @swagger
- * /api/users/me:
+ * /users/me:
  *   get:
  *     summary: Get currently authenticated user information
  *     tags: [User]

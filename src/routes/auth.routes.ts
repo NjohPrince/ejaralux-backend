@@ -5,12 +5,14 @@ import {
   logoutHandler,
   refreshAccessTokenHandler,
   registerUserHandler,
+  verifyEmailHandler,
 } from "../controllers/auth.controller";
 import { validate } from "../middleware/validate";
 import { createUserSchema, loginUserSchema } from "../schemas/auth.schema";
 import { requireUser } from "../middleware/require-user";
 import { deserializeUser } from "../middleware/deserialize-user";
 import { loginLimiter, signupLimiter } from "../middleware/rate-limiters";
+import { verifyEmailSchema } from "../schemas/v-email.schema";
 
 const router = express.Router();
 
@@ -38,6 +40,7 @@ const router = express.Router();
  *               - firstName
  *               - lastName
  *               - password
+ *               - passwordConfirm
  *             properties:
  *               email:
  *                 type: string
@@ -46,6 +49,8 @@ const router = express.Router();
  *               lastName:
  *                 type: string
  *               password:
+ *                 type: string
+ *               passwordConfirm:
  *                 type: string
  *     responses:
  *       201:
@@ -95,7 +100,7 @@ router.post(
 
 /**
  * @swagger
- * /api/auth/logout:
+ * /auth/logout:
  *   get:
  *     summary: Logout user by clearing tokens and session
  *     tags: [Auth]
@@ -117,7 +122,7 @@ router.get("/logout", deserializeUser, requireUser, logoutHandler);
 
 /**
  * @swagger
- * /api/auth/refresh:
+ * /auth/refresh:
  *   get:
  *     summary: Refresh access token using refresh token cookie
  *     tags: [Auth]
@@ -139,5 +144,65 @@ router.get("/logout", deserializeUser, requireUser, logoutHandler);
  *         description: Forbidden - invalid or missing refresh token
  */
 router.get("/refresh", refreshAccessTokenHandler);
+
+/**
+ * @swagger
+ * /auth/verifyemail/{verificationCode}:
+ *   get:
+ *     summary: Verify a user's email address using a verification code
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: path
+ *         name: verificationCode
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Hashed verification code sent to the user's email
+ *     responses:
+ *       200:
+ *         description: Email verified successfully or already verified
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Email verified successfully
+ *       400:
+ *         description: Invalid or expired verification link
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: fail
+ *                 message:
+ *                   type: string
+ *                   example: Verification link is invalid or expired
+ *       404:
+ *         description: Verification code not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: fail
+ *                 message:
+ *                   type: string
+ *                   example: Could not verify email
+ */
+router.get(
+  "/verifyemail/:verificationCode",
+  validate(verifyEmailSchema),
+  verifyEmailHandler
+);
 
 export default router;

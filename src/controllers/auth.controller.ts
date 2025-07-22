@@ -1,9 +1,11 @@
 import config from "config";
 import { CookieOptions, NextFunction, Request, Response } from "express";
+import crypto from "crypto";
 
 import { CreateUserInput, LoginUserInput } from "../schemas/auth.schema";
 import {
   createUser,
+  findUser,
   findUserByEmail,
   findUserById,
   signTokens,
@@ -13,6 +15,8 @@ import AppError from "../utils/app-error.util";
 import { signJwt, verifyJwt } from "../utils/jwt.util";
 import redisClient from "../utils/connect-redis.util";
 import Email from "../utils/email.util";
+import { VerifyEmailInput } from "../schemas/v-email.schema";
+import { AppDataSource } from "../utils/data-source.util";
 
 const cookiesOptions: CookieOptions = {
   httpOnly: true,
@@ -42,10 +46,16 @@ export const registerUserHandler = async (
   res: Response,
   next: NextFunction
 ) => {
+  const dataSource = AppDataSource;
+  const queryRunner = dataSource.createQueryRunner();
+
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
+
   try {
     const { firstName, lastName, password, email } = req.body;
 
-    const newUser = await createUser({
+    const user = queryRunner.manager.create(User, {
       firstName,
       lastName,
       email: email.toLowerCase(),
@@ -55,39 +65,46 @@ export const registerUserHandler = async (
 
     const { hashedVerificationCode, verificationCode } =
       User.createVerificationCode();
-    newUser.verificationCode = hashedVerificationCode;
-    await newUser.save();
+    user.verificationCode = hashedVerificationCode;
 
-    // send verification email
+    await queryRunner.manager.save(user);
+
     const redirectUrl = `${config.get<string>(
       "origin"
-    )}/verifyemail/${verificationCode}`;
+    )}/verify-email?verificationCode=${verificationCode}`;
 
     try {
-      await new Email(newUser, redirectUrl).sendVerificationCode();
+      await new Email(user, redirectUrl).sendVerificationCode();
+      await queryRunner.commitTransaction();
 
-      res.status(201).json({
+      return res.status(201).json({
         status: "success",
         message:
           "An email with a verification link has been sent to your email",
       });
     } catch (error) {
-      newUser.verificationCode = null;
-      await newUser.save();
-
+      await queryRunner.rollbackTransaction();
+      console.log("====================================");
+      console.log({ error });
+      console.log("====================================");
       return res.status(500).json({
         status: "error",
         message: "There was an error sending email, please try again",
       });
     }
   } catch (err: any) {
+    await queryRunner.rollbackTransaction();
+
     if (err.code === "23505") {
       return res.status(409).json({
         status: "fail",
-        message: "User with that email already exist",
+        message: "User with that email already exists",
       });
     }
+
     next(err);
+  } finally {
+    await queryRunner.release();
   }
 };
 
@@ -100,7 +117,15 @@ export const loginUserHandler = async (
     const { email, password } = req.body;
     const user = await findUserByEmail({ email });
 
-    if (!user || !(await User.comparePasswords(password, user.password))) {
+    if (!user) {
+      return next(new AppError(400, "Invalid email or password"));
+    }
+
+    if (!user.verified) {
+      return next(new AppError(400, "Please verify your email"));
+    }
+
+    if (!(await User.comparePasswords(password, user.password))) {
       return next(new AppError(400, "Invalid email or password"));
     }
 
@@ -195,6 +220,43 @@ export const logoutHandler = async (
 
     return res.status(200).json({
       status: "success",
+    });
+  } catch (err: any) {
+    next(err);
+  }
+};
+
+export const verifyEmailHandler = async (
+  req: Request<VerifyEmailInput>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const verificationCode = crypto
+      .createHash("sha256")
+      .update(req.params.verificationCode)
+      .digest("hex");
+
+    const user = await findUser({ verificationCode });
+
+    if (!user) {
+      return next(new AppError(404, "Verification link is invalid or expired"));
+    }
+
+    if (user.verified) {
+      return res.status(200).json({
+        status: "success",
+        message: "Email is already verified",
+      });
+    }
+
+    user.verified = true;
+    user.verificationCode = null;
+    await user.save();
+
+    return res.status(200).json({
+      status: "success",
+      message: "Email verified successfully",
     });
   } catch (err: any) {
     next(err);
