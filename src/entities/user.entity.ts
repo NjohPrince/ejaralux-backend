@@ -1,8 +1,9 @@
-import { Entity, Column, Index, BeforeInsert } from "typeorm";
+import { Entity, Column, Index, BeforeInsert, OneToMany } from "typeorm";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
 import Model from "./model.entity";
+import { Order } from "./order.entity";
 
 export enum RoleEnumType {
   USER = "user",
@@ -55,6 +56,9 @@ export class User extends Model {
 
   @Column({ type: "timestamp", nullable: true })
   passwordResetExpires: Date | null;
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 
   toJSON() {
     return { ...this, password: undefined, verified: undefined };

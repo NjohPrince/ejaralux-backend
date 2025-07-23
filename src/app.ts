@@ -10,6 +10,7 @@ import authRouter from "./routes/auth.routes";
 import userRouter from "./routes/user.routes";
 import categoryRoutes from "./routes/category.routes";
 import productRoutes from "./routes/product.routes";
+import orderRoutes from "./routes/order.routes";
 import { AppDataSource } from "./utils/data-source.util";
 import validateEnv from "./utils/validate-env.util";
 import redisClient from "./utils/connect-redis.util";
@@ -59,6 +60,7 @@ AppDataSource.initialize()
     app.use("/api/users", userRouter);
     app.use("/api/categories", categoryRoutes);
     app.use("/api/products", productRoutes);
+    app.use("/api/orders", orderRoutes);
 
     app.get("/api/healthChecker", async (_, res: Response) => {
       const message = await redisClient.get("try");
