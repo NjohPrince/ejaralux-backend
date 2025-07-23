@@ -1,9 +1,16 @@
-import { FindOptionsWhere } from "typeorm";
+import { FindOptionsWhere, LessThan } from "typeorm";
 
 import { Product } from "../entities/product.entity";
 import { Category } from "../entities/category.entity";
 import AppError from "../utils/app-error.util";
 import { AppDataSource } from "../utils/data-source.util";
+// import redisClient from "../utils/connect-redis.util";
+
+// interface GetProductsCursorQuery {
+//   limit?: number;
+//   categoryId?: string;
+//   cursor?: string; // base64 encoded cursor string (createdAt + id)
+// }
 
 export class ProductService {
   private productRepo = AppDataSource.getRepository(Product);
@@ -85,6 +92,83 @@ export class ProductService {
       products,
     };
   }
+
+  //   async getProductsCursor(query: GetProductsCursorQuery) {
+  //     const limit = query.limit ?? 10;
+  //     const filters: any = {};
+  //     if (query.categoryId) {
+  //       filters.category = { id: query.categoryId };
+  //     }
+
+  //     // decode cursor if provided
+  //     let cursorCreatedAt: Date | undefined = undefined;
+  //     let cursorId: string | undefined = undefined;
+  //     if (query.cursor) {
+  //       try {
+  //         const decoded = Buffer.from(query.cursor, "base64").toString("ascii");
+  //         const [createdAtStr, id] = decoded.split("_");
+  //         cursorCreatedAt = new Date(createdAtStr);
+  //         cursorId = id;
+  //       } catch {
+  //         throw new Error("Invalid cursor");
+  //       }
+  //     }
+
+  //     // build query conditions with cursor
+  //     let whereCondition = filters;
+  //     if (cursorCreatedAt && cursorId) {
+  //       // pagination keyset logic:
+  //       // (createdAt, id) < (cursorCreatedAt, cursorId)
+  //       // for descending createdAt order
+  //       whereCondition = [
+  //         {
+  //           ...filters,
+  //           createdAt: LessThan(cursorCreatedAt),
+  //         },
+  //         {
+  //           ...filters,
+  //           createdAt: cursorCreatedAt,
+  //           id: LessThan(cursorId),
+  //         },
+  //       ];
+  //     }
+
+  //     // check cache key
+  //     const cacheKey = `products:${query.categoryId || "all"}:${
+  //       query.cursor || "start"
+  //     }:${limit}`;
+  //     const cached = await redisClient.get(cacheKey);
+  //     if (cached) {
+  //       return JSON.parse(cached);
+  //     }
+
+  //     // fetch data
+  //     const products = await this.productRepo.find({
+  //       where: whereCondition,
+  //       take: limit,
+  //       order: { createdAt: "DESC", id: "DESC" },
+  //       relations: ["category"],
+  //     });
+
+  //     // prepare next cursor (last item)
+  //     let nextCursor: string | null = null;
+  //     if (products.length === limit) {
+  //       const last = products[products.length - 1];
+  //       nextCursor = Buffer.from(
+  //         `${last.createdAt.toISOString()}_${last.id}`
+  //       ).toString("base64");
+  //     }
+
+  //     const result = {
+  //       products,
+  //       nextCursor,
+  //     };
+
+  //     // cache result for short time (e.g., 30 seconds)
+  //     await redisClient.set(cacheKey, JSON.stringify(result), { EX: 30 });
+
+  //     return result;
+  //   }
 
   async updateProduct(
     id: string,
