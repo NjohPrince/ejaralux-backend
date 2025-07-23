@@ -4,6 +4,7 @@ import { Product } from "../entities/product.entity";
 import { Category } from "../entities/category.entity";
 import AppError from "../utils/app-error.util";
 import { AppDataSource } from "../utils/data-source.util";
+import { deleteFile } from "../utils/unlink.util";
 // import redisClient from "../utils/connect-redis.util";
 
 // interface GetProductsCursorQuery {
@@ -30,6 +31,9 @@ export class ProductService {
     });
 
     if (!category) {
+      if (data?.image) {
+        await deleteFile(data?.image);
+      }
       throw new AppError(404, "Category not found");
     }
 
@@ -38,6 +42,9 @@ export class ProductService {
     });
 
     if (existing) {
+      if (data?.image) {
+        await deleteFile(data?.image);
+      }
       throw new AppError(409, "Product name must be unique");
     }
 
