@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 
 import { ProductService } from "../services/product.service";
+import { deleteFile } from "../utils/unlink.util";
 
 const productService = new ProductService();
 
@@ -9,8 +10,8 @@ export const createProductHandler = async (
   res: Response,
   next: NextFunction
 ) => {
+  const imagePath = req.file?.path || "";
   try {
-    const imagePath = req.file?.path || "";
     const product = await productService.createProduct({
       ...req.body,
       price: parseFloat(req.body.price),
@@ -19,6 +20,10 @@ export const createProductHandler = async (
     });
     return res.status(201).json({ status: "success", data: product });
   } catch (err) {
+    if (imagePath) {
+      await deleteFile(imagePath);
+    }
+
     next(err);
   }
 };
