@@ -15,6 +15,7 @@ import { requireUser } from "../middleware/require-user";
 import { requireAdminRole } from "../middleware/check-role";
 import { validate } from "../middleware/validate";
 import { RoleEnumType } from "../entities/user.entity";
+import { deserializeUser } from "../middleware/deserialize-user";
 
 const router = Router();
 
@@ -56,6 +57,7 @@ const router = Router();
  */
 router.post(
   "/",
+  deserializeUser,
   requireUser,
   requireAdminRole(RoleEnumType.ADMIN),
   validate(createProductSchema),
@@ -155,6 +157,7 @@ router.get("/:id", getProductHandler);
  */
 router.patch(
   "/:id",
+  deserializeUser,
   requireUser,
   requireAdminRole(RoleEnumType.ADMIN),
   validate(updateProductSchema),
@@ -182,6 +185,7 @@ router.patch(
  */
 router.delete(
   "/:id",
+  deserializeUser,
   requireUser,
   requireAdminRole(RoleEnumType.ADMIN),
   deleteProductHandler

@@ -10,7 +10,12 @@ import {
   verifyEmailHandler,
 } from "../controllers/auth.controller";
 import { validate } from "../middleware/validate";
-import { createUserSchema, forgotPasswordSchema, loginUserSchema, resetPasswordSchema } from "../schemas/auth.schema";
+import {
+  createUserSchema,
+  forgotPasswordSchema,
+  loginUserSchema,
+  resetPasswordSchema,
+} from "../schemas/auth.schema";
 import { requireUser } from "../middleware/require-user";
 import { deserializeUser } from "../middleware/deserialize-user";
 import { loginLimiter, signupLimiter } from "../middleware/rate-limiters";
@@ -228,10 +233,12 @@ router.get(
  *         description: Reset email sent
  *       404:
  *         description: No user found
- *       500:
- *         $ref: '#/components/schemas/ErrorResponse'
  */
-router.post("/forgot-password", validate(forgotPasswordSchema), forgotPasswordHandler);
+router.post(
+  "/forgot-password",
+  validate(forgotPasswordSchema),
+  forgotPasswordHandler
+);
 
 /**
  * @swagger
@@ -260,9 +267,11 @@ router.post("/forgot-password", validate(forgotPasswordSchema), forgotPasswordHa
  *         description: Password reset successful
  *       400:
  *         description: Invalid token or expired
- *       500:
- *         $ref: '#/components/schemas/ErrorResponse'
  */
-router.post("/reset-password", validate(resetPasswordSchema), resetPasswordHandler);
+router.post(
+  "/reset-password",
+  validate(resetPasswordSchema),
+  resetPasswordHandler
+);
 
 export default router;

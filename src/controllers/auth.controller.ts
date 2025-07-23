@@ -294,9 +294,9 @@ export const forgotPasswordHandler = catchAsync(
 
     await userRepo.save(user);
 
-    const resetURL = `${req.protocol}://${req.get(
+    const resetURL = `${config.get<string>("origin")}/${req.get(
       "host"
-    )}/auth/reset-password/${resetToken}`;
+    )}/auth/change-password/${resetToken}`;
 
     try {
       await new Email(user, resetURL).sendPasswordResetToken();
@@ -338,7 +338,7 @@ export const resetPasswordHandler = catchAsync(
 
     await userRepo.save(user);
 
-    res
+    return res
       .status(200)
       .json({ status: "success", message: "Password reset successfully" });
   }

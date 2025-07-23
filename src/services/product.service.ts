@@ -74,7 +74,7 @@ export class ProductService {
       skip,
       take: limit,
       relations: ["category"],
-      order: { created_at: "DESC" },
+      order: { createdAt: "DESC" },
     });
 
     return {

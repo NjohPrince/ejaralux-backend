@@ -6,6 +6,11 @@ import { ZodError, ZodObject, ZodRawShape } from "zod";
 export const validate =
   (schema: ZodObject<ZodRawShape>) =>
   (req: Request, res: Response, next: NextFunction) => {
+    console.log("====================================");
+    console.log({
+      body: req.body,
+    });
+    console.log("====================================");
     try {
       schema.parse({
         body: req.body,
