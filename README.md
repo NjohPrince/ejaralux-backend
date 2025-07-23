@@ -30,7 +30,13 @@ yarn install
 
 3. Create a `.env.local` file and paste the content from `env.example` file located at the root of the project folder.
 
-4. Start the debvelopment server as follows:
+4. Run the db migrations and push them to the db
+
+```bash
+yarn run migrate && yarn run db:push
+```
+
+5. Start the debvelopment server as follows:
 
 ```bash
 yarn start
