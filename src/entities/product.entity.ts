@@ -18,6 +18,9 @@ export class Product extends Model {
   @Column({ unique: true })
   name: string;
 
+  @Column({ nullable: true })
+  image: string;
+
   @Column()
   slug: string;
 

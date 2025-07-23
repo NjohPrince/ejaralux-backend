@@ -10,7 +10,13 @@ export const createProductHandler = async (
   next: NextFunction
 ) => {
   try {
-    const product = await productService.createProduct(req.body);
+    const imagePath = req.file?.path || "";
+    const product = await productService.createProduct({
+      ...req.body,
+      price: parseFloat(req.body.price),
+      quantity: parseInt(req.body.quantity),
+      image: imagePath,
+    });
     return res.status(201).json({ status: "success", data: product });
   } catch (err) {
     next(err);

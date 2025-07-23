@@ -34,4 +34,4 @@ const upload = multer({
   limits: { fileSize: 1024 * 1024 * 5, files: 1 },
 });
 
-export const uploadPostImageDisk = upload.single("image");
+export const uploadProductImage = upload.single("image");

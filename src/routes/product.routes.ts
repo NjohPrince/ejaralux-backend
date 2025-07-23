@@ -16,6 +16,7 @@ import { requireAdminRole } from "../middleware/check-role";
 import { validate } from "../middleware/validate";
 import { RoleEnumType } from "../entities/user.entity";
 import { deserializeUser } from "../middleware/deserialize-user";
+import { uploadProductImage } from "../upload/upload";
 
 const router = Router();
 
@@ -37,7 +38,7 @@ const router = Router();
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -47,6 +48,9 @@ const router = Router();
  *               quantity: { type: number }
  *               unit: { type: string, enum: ["mL", "g", "pcs", "set"] }
  *               categoryId: { type: string, format: uuid }
+ *               image:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       201:
  *         description: Product created
@@ -60,6 +64,7 @@ router.post(
   deserializeUser,
   requireUser,
   requireAdminRole(RoleEnumType.ADMIN),
+  uploadProductImage,
   validate(createProductSchema),
   createProductHandler
 );
