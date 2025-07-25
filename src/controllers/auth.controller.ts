@@ -80,7 +80,7 @@ export const registerUserHandler = async (
 
     const redirectUrl = `${config.get<string>(
       "origin"
-    )}/verify-email?verificationCode=${verificationCode}`;
+    )}/auth/verify-email?verificationCode=${verificationCode}`;
 
     try {
       await new Email(user, redirectUrl).sendVerificationCode();
@@ -294,8 +294,8 @@ export const forgotPasswordHandler = catchAsync(
 
     await userRepo.save(user);
 
-    const resetURL = `${config.get<string>("origin")}/${req.get(
-      "host"
+    const resetURL = `${config.get<string>(
+      "origin"
     )}/auth/change-password/${resetToken}`;
 
     try {
