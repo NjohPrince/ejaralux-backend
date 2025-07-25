@@ -249,7 +249,7 @@ export const verifyEmailHandler = async (
     const user = await findUser({ verificationCode });
 
     if (!user) {
-      return next(new AppError(404, "Verification link is invalid or expired"));
+      return new AppError(404, "Verification link is invalid or expired");
     }
 
     if (user.verified) {
