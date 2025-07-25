@@ -296,7 +296,7 @@ export const forgotPasswordHandler = catchAsync(
 
     const resetURL = `${config.get<string>(
       "origin"
-    )}/auth/change-password/${resetToken}`;
+    )}/auth/change-password?token=${resetToken}`;
 
     try {
       await new Email(user, resetURL).sendPasswordResetToken();
