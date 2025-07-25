@@ -36,7 +36,13 @@ yarn install
 yarn run migrate && yarn run db:push
 ```
 
-5. Start the debvelopment server as follows:
+5. Run the database default seeder
+
+```bash
+yarn run seed:categories
+```
+
+6. Start the debvelopment server as follows:
 
 ```bash
 yarn start
