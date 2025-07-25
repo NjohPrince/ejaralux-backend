@@ -1,5 +1,4 @@
 export const categories = [
-  { name: "All" },
   { name: "Glow Serums" },
   { name: "Moisturizers & Creams" },
   { name: "Cleansers & Toners" },
